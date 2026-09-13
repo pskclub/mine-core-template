@@ -1,0 +1,53 @@
+# Who reviews what.
+#
+# The layout is what makes this file short: a feature is one directory, so a team
+# owns a line rather than a list of files scattered across services/, requests/
+# and repo/.
+#
+# GitHub reads this from the repository root, .github/ or docs/. The owners
+# below are placeholders (@platform, @team-orders): replace them with real users
+# or teams, then uncomment the rules. GitHub flags an unknown owner as an error
+# in this file, which is why they start out commented.
+
+# --- Shared kernel and wiring -------------------------------------------------
+# Everything depends on these, so a change here can break any team's module. They
+# also encode the rules the layout rests on, which is why they are not owned by
+# whoever happened to need them changed.
+# /models/                @platform
+# /consts/
+# /middlewares/
+# /repo/
+# /emsgs/
+# /testkit/               @platform
+# /arch/                  @platform
+# /cmd/                   @platform
+# /prisma/                @platform
+# /.github/               @platform
+# /.golangci.yml          @platform
+# /Makefile               @platform
+
+# --- Modules ------------------------------------------------------------------
+# One line per module — the trailing slash covers handler/, service/, store/ and
+# anything added later. A team owns its module, plus the three files elsewhere
+# that belong to it: the model, the schema, and its error codes.
+#
+#   /modules/orders/            @team-orders
+#   /models/order.model.go      @team-orders
+#   /prisma/schema/orders.prisma @team-orders
+#   /emsgs/order.emsgs.go       @team-orders
+#
+# The model and schema lines override the shared-kernel rule above, because a
+# later match wins. That is deliberate: a table's shape is the owning team's to
+# change, while the package it sits in is the platform's to keep coherent.
+
+# /modules/auth/          @platform
+# /models/access_token.model.go @platform
+# /emsgs/auth.emsgs.go    @platform
+
+# /modules/user/          @platform
+# /models/user.model.go   @platform
+# /emsgs/user.emsgs.go    @platform
+
+# /modules/note/          @platform
+# /models/note.model.go   @platform
+# /emsgs/note.emsgs.go    @platform

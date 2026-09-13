@@ -1,0 +1,194 @@
+@baseUrl = http://localhost:3000
+
+# Paste the `token` from POST /auth/login here. Everything under /users needs it.
+@token = REPLACE_ME
+
+### health
+GET {{baseUrl}}/healthz
+Accept: application/json
+
+###
+### auth — register and login are the only public endpoints
+###
+
+### register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "member@example.com",
+  "full_name": "Member",
+  "password": "correct-horse"
+}
+
+### sign in — copy `token` from the response into @token above
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "member@example.com",
+  "password": "correct-horse"
+}
+
+### wrong password — same answer as an unknown address, on purpose
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "member@example.com",
+  "password": "not-the-password"
+}
+
+### who am I
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### sign out — the token stops working immediately
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+
+###
+### users — all of these require a token
+###
+
+### without a token: 401
+GET {{baseUrl}}/users
+Accept: application/json
+
+### list
+GET {{baseUrl}}/users?limit=10&page=1&order_by=created_at desc
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### search (q matches full_name)
+GET {{baseUrl}}/users?q=Member
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### create
+POST {{baseUrl}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "email": "pskclub@example.com",
+  "full_name": "pskclub"
+}
+
+### invalid on purpose: {"code":"INVALID_PARAMS","fields":{"email":{...,"in":"body"}}}
+POST {{baseUrl}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "email": "not-an-email",
+  "full_name": "p"
+}
+
+### bulk create — all of them or none
+POST {{baseUrl}}/users/bulk
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "users": [
+    { "email": "one@example.com", "full_name": "User One" },
+    { "email": "two@example.com", "full_name": "User Two" }
+  ]
+}
+
+### per-entry violations, named by index: users.1.email and users.2.email
+POST {{baseUrl}}/users/bulk
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "users": [
+    { "email": "dup@example.com", "full_name": "First" },
+    { "email": "not-an-email", "full_name": "X" },
+    { "email": "DUP@example.com", "full_name": "Repeat of the first" }
+  ]
+}
+
+### find
+GET {{baseUrl}}/users/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### update
+PUT {{baseUrl}}/users/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "full_name": "pskclub updated"
+}
+
+### delete (soft)
+DELETE {{baseUrl}}/users/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+###
+
+# -----------------------------------------------------------------------------
+# notes — the example module (modules/note). Every route is scoped to the token
+# holder: another account's note answers 404, not 403.
+# -----------------------------------------------------------------------------
+
+### create
+POST {{baseUrl}}/notes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Groceries",
+  "body": "milk, bread, coffee",
+  "pinned": true
+}
+
+### list — pinned first, then newest. order_by is restricted to an allowlist.
+GET {{baseUrl}}/notes?limit=10&page=1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### search by title
+GET {{baseUrl}}/notes?limit=10&page=1&q=grocer
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### find
+GET {{baseUrl}}/notes/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### update — pinned:false is written, unlike a struct update which would skip it
+PUT {{baseUrl}}/notes/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Groceries, done",
+  "body": "milk, bread, coffee",
+  "pinned": false
+}
+
+### delete (soft)
+DELETE {{baseUrl}}/notes/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+##############################################################################
+# exchange — a module whose data lives in somebody else's API.
+# Needs EXCHANGE_BASE_URL; without it the answer is EXCHANGE_NOT_CONFIGURED.
+##############################################################################
+
+### quote one currency against another
+GET {{baseUrl}}/exchange-rates/THB?quote=USD
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### a malformed code never reaches the provider — 400 INVALID_PARAMS
+GET {{baseUrl}}/exchange-rates/THBX?quote=USD
+Authorization: Bearer {{token}}
+Accept: application/json
+
+###

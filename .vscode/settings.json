@@ -1,0 +1,14 @@
+{
+  // Matches `make lint` (go vet + gofmt). Install golangci-lint and switch
+  // go.lintTool to "golangci-lint" to get `make lint-strict` in the editor.
+  "go.vetOnSave": "package",
+  "go.lintOnSave": "off",
+  "go.testFlags": ["-count=1"],
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": { "source.organizeImports": "explicit" }
+  },
+  "[prisma]": { "editor.formatOnSave": true },
+  "files.exclude": { "**/tmp": true },
+  "search.exclude": { "data/*.generated.json": true }
+}

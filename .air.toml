@@ -1,0 +1,75 @@
+# Live reload for `make dev` — https://github.com/air-verse/air
+#
+# `make dev` is `go tool air` — air is a tool dependency in go.mod, so nothing has
+# to be installed and everybody gets the version this repo pins. Its build command
+# and the binary it runs are the only things that genuinely differ per platform,
+# and the [build.windows] table at the bottom is where that difference lives:
+#
+#   - Windows will not execute a file without an extension, and air runs the
+#     build command through PowerShell, so both the -o path and the entrypoint
+#     need `.exe` there and neither may have it on linux/macOS (the container in
+#     dev.Dockerfile builds with this same file).
+#   - The container and the host share ./tmp through the bind mount. Different
+#     names per platform means a linux binary and a windows one never overwrite
+#     each other.
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/main ."
+# `bin` is deprecated in favour of `entrypoint`; first item is the executable,
+# any further items are arguments passed to it.
+entrypoint = ["./tmp/main"]
+
+include_ext = ["go", "tpl", "tmpl", "html"]
+# Config is read once at startup, so .env only takes effect on a restart —
+# watching it makes editing it behave like editing code.
+include_file = [".env"]
+exclude_dir = ["tmp", "vendor", ".git", ".storage", ".claude", "node_modules", "prisma", "data", "assets"]
+# A test file does not change the running service.
+exclude_regex = ["_test\\.go"]
+# Format-on-save rewrites a file without changing it; compare contents, not
+# mtime, so those saves do not each cost a rebuild.
+exclude_unchanged = true
+
+log = "air.log"
+# Editors save in bursts (and gofmt writes again right after) — one rebuild.
+delay = 300
+
+# Keep the port free while a build is broken instead of leaving a stale binary
+# serving requests. Windows has no choice about this — it locks a running
+# executable, so air must stop it before the build can overwrite it — and this
+# keeps the other platforms behaving the same way.
+stop_on_error = true
+
+# Kill the old process outright rather than asking it to shut down gracefully.
+# Windows cannot signal a process tree at all — air uses TASKKILL there and prints
+# a line saying so on every restart — so `true` would buy a slower reload on two
+# platforms, a notice on the third, and nothing that is reproducible on all three.
+# The OS closes the sockets either way. Set it to true (with a kill_delay to
+# match) if you are debugging the shutdown path itself.
+send_interrupt = false
+kill_delay = 500 # ms
+
+[log]
+time = false
+
+[color]
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[misc]
+clean_on_exit = true
+
+[screen]
+clear_on_rebuild = false
+keep_scroll = true
+
+# --- Windows ------------------------------------------------------------------
+# Overrides only; everything above still applies.
+[build.windows]
+cmd = "go build -o ./tmp/main.exe ."
+entrypoint = ["tmp\\main.exe"]

@@ -1,0 +1,25 @@
+// notes is the example module's table. One file per module, matching
+// modules/note — the schema is split the same way the Go code is, so a module's
+// table is where its owner expects to find it.
+//
+// No relation to users is declared. The foreign key would be real enough, but a
+// prisma relation invites a join, and a join across two modules' tables is the
+// coupling this layout exists to prevent: notes is owned by modules/note, users
+// by modules/user, and neither reads the other's rows. user_id is stored as a
+// plain column and resolved through the user module's service when a name is
+// actually needed.
+model notes {
+  id      String  @id @default(uuid()) @db.Uuid
+  user_id String  @db.Uuid
+  title   String
+  body    String
+  pinned  Boolean @default(false)
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+  deleted_at DateTime?
+
+  // Every list query is "this user's notes, newest first" — the index matches
+  // that access pattern rather than user_id alone.
+  @@index([user_id, created_at])
+}

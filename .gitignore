@@ -1,0 +1,13 @@
+.idea
+.storage
+.env
+tmp
+gin-bin
+node_modules
+package-lock.json
+yarn-error.log
+.DS_Store
+.bin
+
+# regenerated from the routes on demand: go run ./cmd/generate_postman_collection
+data/postman_collection.generated.json

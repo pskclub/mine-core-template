@@ -1,0 +1,119 @@
+# Postgres and Redis are the two backing services. Prisma owns the schema:
+# every table change goes through a prisma migration, never through GORM
+# automigrate — the Go models describe tables that prisma created.
+#
+#	make migrate-dev   author a migration from prisma/schema (host, interactive)
+#	make migrate       apply committed migrations (container)
+#	make seed          run prisma/seed.ts (container)
+
+x-db-url: &db-url postgresql://my_user:my_password@db:5432/my_database?schema=public
+
+services:
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: dev.Dockerfile
+  #   container_name: api
+  #   restart: always
+  #   volumes:
+  #     - .:/app
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     cache:
+  #       condition: service_healthy
+  #   environment:
+  #     # OS env beats .env, so the container reaches `db`/`cache` while .env keeps
+  #     # pointing at localhost for running the binary on the host.
+  #     - APP_DB_CONNECTION_STRING=postgres://my_user:my_password@db:5432/my_database?sslmode=disable
+  #     - APP_CACHE_CONNECTION_STRING=redis://cache:6379/0
+  #   ports:
+  #     - 3000:3000
+
+  # Same image, worker role: scheduled jobs only, no HTTP port. Keep this at a
+  # single replica — the scheduler queue is in-process, so every replica would
+  # fire every tick.
+  #
+  # For a small service, drop this service and give `api` APP_ROLE=all instead:
+  # one process serves HTTP and runs the jobs, on one set of pools. That also
+  # caps you at one replica.
+  # worker:
+  #   build:
+  #     context: .
+  #     dockerfile: dev.Dockerfile
+  #   container_name: worker
+  #   restart: always
+  #   volumes:
+  #     - .:/app
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     cache:
+  #       condition: service_healthy
+  #   environment:
+  #     - APP_ROLE=worker
+  #     - APP_DB_CONNECTION_STRING=postgres://my_user:my_password@db:5432/my_database?sslmode=disable
+  #     - APP_CACHE_CONNECTION_STRING=redis://cache:6379/0
+
+  # One-shot prisma tasks, behind a profile so `docker compose up -d` does not
+  # run them — but `make migrate` / `make seed` still can, because naming a
+  # service enables its profile.
+  # migration:
+  #   container_name: migration
+  #   profiles: ["tools"]
+  #   build:
+  #     context: .
+  #     dockerfile: migrate.Dockerfile
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   environment:
+  #     # Prisma reads DATABASE_URL; dotenv does not overwrite a value already set.
+  #     # Map form, not list form: a YAML alias only resolves as a whole value.
+  #     DATABASE_URL: *db-url
+
+  # seed:
+  #   container_name: seed
+  #   profiles: ["tools"]
+  #   build:
+  #     context: .
+  #     dockerfile: seed.Dockerfile
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   environment:
+  #     DATABASE_URL: *db-url
+
+  db:
+    image: postgres:17-alpine
+    container_name: db
+    restart: always
+    volumes:
+      - .storage/postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: my_database
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U my_user -d my_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  cache:
+    image: redis:7-alpine
+    container_name: cache
+    restart: always
+    # Persist to disk so a restart does not silently empty the cache mid-debug.
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - .storage/redis_data:/data
+    ports:
+      - 26379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

@@ -1,0 +1,7 @@
+# LF everywhere. gofmt, the committed OpenAPI document and the generated agent
+# skills are all compared byte for byte in CI; a CRLF checkout on Windows would
+# make every one of those checks fail on a file nobody changed.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary

@@ -1,0 +1,32 @@
+# Static analysis, on top of `go vet` and `gofmt`.
+#
+# The import layering that this layout depends on — the shared kernel importing
+# nothing, no module importing a sibling — is NOT enforced here. It lives in
+# internal/arch/arch_test.go instead, so it runs under `make test` with no tool
+# to install, and so a failure can explain in a paragraph why the rule exists
+# rather than pointing at a package name.
+#
+#   go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+version: "2"
+
+linters:
+  # The standard set: errcheck, govet, ineffassign, staticcheck, unused. Adding
+  # to it is cheap; keeping a team's attention on findings it agrees with is
+  # not, so a new linter should be turned on when someone has read what it
+  # reports and wants it.
+  default: standard
+
+  settings:
+    staticcheck:
+      checks:
+        - all
+        # QF1008 wants an embedded field dropped from a selector. In tests that
+        # assert on an embedded model — result.User.ID rather than result.ID —
+        # naming it is the point: it says which struct the field came from.
+        - -QF1008
+
+  exclusions:
+    # A deferred Close, a RemoveAll on a temp directory, a print to stdout: errors
+    # that have nowhere useful to go. The same preset mine-core itself lints with.
+    presets:
+      - std-error-handling
