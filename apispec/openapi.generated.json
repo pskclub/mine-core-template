@@ -1,0 +1,2055 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "mine-core template - Complete Collection (Generated)",
+    "description": "Generated from registered Go routes and request structs.",
+    "version": "0.0.0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Same origin as this page"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Configured base URL"
+    }
+  ],
+  "tags": [
+    {
+      "name": "auth"
+    },
+    {
+      "name": "exchange"
+    },
+    {
+      "name": "home"
+    },
+    {
+      "name": "note"
+    },
+    {
+      "name": "root"
+    },
+    {
+      "name": "user"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "home"
+        ],
+        "summary": "GET /",
+        "operationId": "get",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "status": "i'm ok na"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "POST /auth/login",
+        "description": "Handled by `AuthHandler.Login`.",
+        "operationId": "AuthHandlerLogin",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "required, email address"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "required"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              },
+              "example": {
+                "email": "user@example.com",
+                "password": "secret1234"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "in": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "INVALID_PARAMS",
+                  "fields": {
+                    "email": {
+                      "code": "REQUIRED",
+                      "in": "body",
+                      "message": "The email field is required"
+                    }
+                  },
+                  "message": "Invalid parameters"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "POST /auth/logout",
+        "description": "Handled by `AuthHandler.Logout`.",
+        "operationId": "AuthHandlerLogout",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "GET /auth/me",
+        "description": "Handled by `AuthHandler.Me`.",
+        "operationId": "AuthHandlerMe",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "POST /auth/register",
+        "description": "Handled by `AuthHandler.Register`.",
+        "operationId": "AuthHandlerRegister",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "required, email address"
+                  },
+                  "full_name": {
+                    "type": "string",
+                    "description": "required, 2-100 characters",
+                    "minLength": 2,
+                    "maxLength": 100
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "required, 8-72 characters",
+                    "minLength": 8,
+                    "maxLength": 72
+                  }
+                },
+                "required": [
+                  "email",
+                  "full_name",
+                  "password"
+                ]
+              },
+              "example": {
+                "email": "user@example.com",
+                "full_name": "Jane Doe",
+                "password": "secret1234"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "in": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "INVALID_PARAMS",
+                  "fields": {
+                    "email": {
+                      "code": "REQUIRED",
+                      "in": "body",
+                      "message": "The email field is required"
+                    }
+                  },
+                  "message": "Invalid parameters"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exchange-rates/{base}": {
+      "get": {
+        "tags": [
+          "exchange"
+        ],
+        "summary": "GET /exchange-rates/{base}",
+        "description": "Handled by `ExchangeHandler.Find`.",
+        "operationId": "ExchangeHandlerFind",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "required",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "string"
+          },
+          {
+            "name": "quote",
+            "in": "query",
+            "description": "required",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "as_of": {
+                      "type": "string"
+                    },
+                    "base": {
+                      "type": "string"
+                    },
+                    "quote": {
+                      "type": "string"
+                    },
+                    "rate": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "example": {
+                  "as_of": "string",
+                  "base": "string",
+                  "quote": "string",
+                  "rate": 1.23
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "properties": {
+                        "base": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "in": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "INVALID_PARAMS",
+                  "fields": {
+                    "base": {
+                      "code": "REQUIRED",
+                      "in": "path",
+                      "message": "The base field is required"
+                    }
+                  },
+                  "message": "Invalid parameters"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/healthz": {
+      "get": {
+        "tags": [
+          "root"
+        ],
+        "summary": "GET /healthz",
+        "operationId": "getHealthz",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "status": "up"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notes": {
+      "get": {
+        "tags": [
+          "note"
+        ],
+        "summary": "GET /notes",
+        "description": "Handled by `NoteHandler.Pagination`.",
+        "operationId": "NoteHandlerPagination",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "rows per page",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 30
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "page number, 1-based",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "body": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "pinned": {
+                            "type": "boolean"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "user_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "q": {
+                      "type": "string"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "count": 1,
+                  "items": [
+                    {
+                      "body": "string",
+                      "created_at": "2026-01-01T00:00:00Z",
+                      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                      "pinned": true,
+                      "title": "Sample title",
+                      "updated_at": "2026-01-01T00:00:00Z",
+                      "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    }
+                  ],
+                  "limit": 10,
+                  "page": 1,
+                  "q": "string",
+                  "total": 1
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "note"
+        ],
+        "summary": "POST /notes",
+        "description": "Handled by `NoteHandler.Create`.",
+        "operationId": "NoteHandlerCreate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "body": {
+                    "type": "string",
+                    "description": "required, 1-10000 characters",
+                    "minLength": 1,
+                    "maxLength": 10000
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "required, 1-120 characters",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "title",
+                  "body"
+                ]
+              },
+              "example": {
+                "body": "string",
+                "pinned": true,
+                "title": "Sample title"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "pinned": {
+                      "type": "boolean"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "body": "string",
+                  "created_at": "2026-01-01T00:00:00Z",
+                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "pinned": true,
+                  "title": "Sample title",
+                  "updated_at": "2026-01-01T00:00:00Z",
+                  "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "in": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "INVALID_PARAMS",
+                  "fields": {
+                    "title": {
+                      "code": "REQUIRED",
+                      "in": "body",
+                      "message": "The title field is required"
+                    }
+                  },
+                  "message": "Invalid parameters"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/notes/{id}": {
+      "get": {
+        "tags": [
+          "note"
+        ],
+        "summary": "GET /notes/{id}",
+        "description": "Handled by `NoteHandler.Find`.",
+        "operationId": "NoteHandlerFind",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "pinned": {
+                      "type": "boolean"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "body": "string",
+                  "created_at": "2026-01-01T00:00:00Z",
+                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "pinned": true,
+                  "title": "Sample title",
+                  "updated_at": "2026-01-01T00:00:00Z",
+                  "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "note"
+        ],
+        "summary": "PUT /notes/{id}",
+        "description": "Handled by `NoteHandler.Update`.",
+        "operationId": "NoteHandlerUpdate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "required, UUID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "body": {
+                    "type": "string",
+                    "description": "required, 1-10000 characters",
+                    "minLength": 1,
+                    "maxLength": 10000
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "required, 1-120 characters",
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                },
+                "required": [
+                  "title",
+                  "body"
+                ]
+              },
+              "example": {
+                "body": "string",
+                "pinned": true,
+                "title": "Sample title"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "pinned": {
+                      "type": "boolean"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "body": "string",
+                  "created_at": "2026-01-01T00:00:00Z",
+                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "pinned": true,
+                  "title": "Sample title",
+                  "updated_at": "2026-01-01T00:00:00Z",
+                  "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "in": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "INVALID_PARAMS",
+                  "fields": {
+                    "id": {
+                      "code": "REQUIRED",
+                      "in": "path",
+                      "message": "The id field is required"
+                    }
+                  },
+                  "message": "Invalid parameters"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "note"
+        ],
+        "summary": "DELETE /notes/{id}",
+        "description": "Handled by `NoteHandler.Delete`.",
+        "operationId": "NoteHandlerDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/readyz": {
+      "get": {
+        "tags": [
+          "root"
+        ],
+        "summary": "GET /readyz",
+        "operationId": "getReadyz",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "checks": {
+                      "type": "object",
+                      "properties": {
+                        "cache": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string"
+                            },
+                            "took_ms": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "database": {
+                          "type": "object",
+                          "properties": {
+                            "critical": {
+                              "type": "boolean"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "took_ms": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "service": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "took_ms": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "checks": {
+                    "cache": {
+                      "status": "up",
+                      "took_ms": 1
+                    },
+                    "database": {
+                      "critical": true,
+                      "status": "up",
+                      "took_ms": 2
+                    }
+                  },
+                  "service": "string",
+                  "status": "up",
+                  "took_ms": 3
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "checks": {
+                      "type": "object",
+                      "properties": {
+                        "cache": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string"
+                            },
+                            "took_ms": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "database": {
+                          "type": "object",
+                          "properties": {
+                            "critical": {
+                              "type": "boolean"
+                            },
+                            "error": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "took_ms": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "service": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "took_ms": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "checks": {
+                    "cache": {
+                      "status": "up",
+                      "took_ms": 1
+                    },
+                    "database": {
+                      "critical": true,
+                      "error": "context deadline exceeded",
+                      "status": "down",
+                      "took_ms": 3000
+                    }
+                  },
+                  "service": "string",
+                  "status": "down",
+                  "took_ms": 3000
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "GET /users",
+        "description": "Handled by `UserHandler.Pagination`.",
+        "operationId": "UserHandlerPagination",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "rows per page",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 30
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "page number, 1-based",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "full_name": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "q": {
+                      "type": "string"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "count": 1,
+                  "items": [
+                    {
+                      "created_at": "2026-01-01T00:00:00Z",
+                      "email": "user@example.com",
+                      "full_name": "Jane Doe",
+                      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                      "updated_at": "2026-01-01T00:00:00Z"
+                    }
+                  ],
+                  "limit": 10,
+                  "page": 1,
+                  "q": "string",
+                  "total": 1
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "POST /users",
+        "description": "Handled by `UserHandler.Create`.",
+        "operationId": "UserHandlerCreate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "required, email address"
+                  },
+                  "full_name": {
+                    "type": "string",
+                    "description": "required, 2-100 characters",
+                    "minLength": 2,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "email",
+                  "full_name"
+                ]
+              },
+              "example": {
+                "email": "user@example.com",
+                "full_name": "Jane Doe"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "full_name": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "created_at": "2026-01-01T00:00:00Z",
+                  "email": "user@example.com",
+                  "full_name": "Jane Doe",
+                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "updated_at": "2026-01-01T00:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "in": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "INVALID_PARAMS",
+                  "fields": {
+                    "email": {
+                      "code": "REQUIRED",
+                      "in": "body",
+                      "message": "The email field is required"
+                    }
+                  },
+                  "message": "Invalid parameters"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/bulk": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "POST /users/bulk",
+        "description": "Handled by `UserHandler.CreateBulk`.",
+        "operationId": "UserHandlerCreateBulk",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "users": {
+                    "type": "array",
+                    "description": "required, min 1, max 100",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "string"
+                        },
+                        "full_name": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "minItems": 1,
+                    "maxItems": 100
+                  }
+                },
+                "required": [
+                  "users"
+                ]
+              },
+              "example": {
+                "users": [
+                  {
+                    "email": "user@example.com",
+                    "full_name": "Jane Doe"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "full_name": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "count": 1,
+                  "items": [
+                    {
+                      "created_at": "2026-01-01T00:00:00Z",
+                      "email": "user@example.com",
+                      "full_name": "Jane Doe",
+                      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                      "updated_at": "2026-01-01T00:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "properties": {
+                        "users": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "in": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "INVALID_PARAMS",
+                  "fields": {
+                    "users": {
+                      "code": "REQUIRED",
+                      "in": "body",
+                      "message": "The users field is required"
+                    }
+                  },
+                  "message": "Invalid parameters"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "GET /users/{id}",
+        "description": "Handled by `UserHandler.Find`.",
+        "operationId": "UserHandlerFind",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "full_name": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "created_at": "2026-01-01T00:00:00Z",
+                  "email": "user@example.com",
+                  "full_name": "Jane Doe",
+                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "updated_at": "2026-01-01T00:00:00Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "PUT /users/{id}",
+        "description": "Handled by `UserHandler.Update`.",
+        "operationId": "UserHandlerUpdate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "required, UUID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "full_name": {
+                    "type": "string",
+                    "description": "required, 2-100 characters",
+                    "minLength": 2,
+                    "maxLength": 100
+                  }
+                },
+                "required": [
+                  "full_name"
+                ]
+              },
+              "example": {
+                "full_name": "Jane Doe"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "full_name": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "created_at": "2026-01-01T00:00:00Z",
+                  "email": "user@example.com",
+                  "full_name": "Jane Doe",
+                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "updated_at": "2026-01-01T00:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "in": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "INVALID_PARAMS",
+                  "fields": {
+                    "id": {
+                      "code": "REQUIRED",
+                      "in": "path",
+                      "message": "The id field is required"
+                    }
+                  },
+                  "message": "Invalid parameters"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "DELETE /users/{id}",
+        "description": "Handled by `UserHandler.Delete`.",
+        "operationId": "UserHandlerDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "unauthorized"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

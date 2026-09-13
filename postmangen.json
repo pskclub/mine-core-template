@@ -1,0 +1,6 @@
+{
+  "name": "mine-core template - Complete Collection (Generated)",
+  "id": "mine-core-template-project-generated",
+  "base_url": "http://localhost:3000",
+  "openapi_output": "apispec/openapi.generated.json"
+}

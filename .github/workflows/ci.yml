@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Formatting, static analysis and the two generated artefacts. Separate from
+  # the tests so a formatting nit and a broken test do not arrive as one red run.
+  #
+  # The import rules the layout depends on are not checked here: they are a Go
+  # test (arch/arch_test.go) and run in the test jobs, so they need no tool and
+  # fail with an explanation rather than a rule name.
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "::error::not gofmt'd -- run 'gofmt -w .'"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: go vet
+        run: go vet ./...
+
+      # Pinned: a new release can add checks, and a lint job that turns red with
+      # no change to the code teaches everyone to ignore it. Same version as
+      # `make lint`.
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.13.2
+
+      - name: go mod tidy is a no-op
+        run: |
+          if ! go mod tidy -diff; then
+            echo "::error::go.mod / go.sum are not tidy -- run 'go mod tidy'"
+            exit 1
+          fi
+
+      # The committed OpenAPI document is what /_docs serves, and go:embed reads
+      # it at compile time. A route added without regenerating leaves the
+      # reference silently incomplete, since the page still loads and looks whole.
+      - name: OpenAPI document matches the routes
+        run: make api-check
+
+      # .codex/skills and the AGENTS.md index are generated from .claude/skills.
+      # A skill added without regenerating is one every agent but Claude Code
+      # never sees, which nothing else would report.
+      - name: Agent skills are in sync
+        run: make skills-check
+
+  # Fast feedback: sqlite in memory, nothing to start.
+  test:
+    name: test (sqlite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: go build
+        run: go build ./...
+      - name: go test
+        run: go test ./...
+
+  # The same suite against a real postgres, on the schema the prisma migrations
+  # produce. sqlite has no partial indexes, no UUID type and no ILIKE, so this is
+  # the job that can fail on a constraint the other one never sees.
+  #
+  # It sets TEST_DATABASE_URL and runs `go test` directly. Locally,
+  # `make test-integration` has cmd/testpg start a postgres of its own; here the
+  # service container already is one, and testpg would defer to an exported
+  # TEST_DATABASE_URL anyway. The variable is read straight from the environment,
+  # not through .env, and has no APP_ prefix.
+  test-postgres:
+    name: test (postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: my_database
+          POSTGRES_USER: my_user
+          POSTGRES_PASSWORD: my_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U my_user -d my_database"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://my_user:my_password@localhost:5432/my_database?sslmode=disable
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: go test
+        run: go test -count=1 ./...
+
+  # The images a real service ships. Built, never pushed: the point is that each
+  # Dockerfile still builds from public base images with no registry login.
+  docker:
+    name: docker build (${{ matrix.dockerfile }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: [Dockerfile, migrate.Dockerfile, seed.Dockerfile]
+    steps:
+      - uses: actions/checkout@v7
+      - name: docker build
+        run: docker build --file "${{ matrix.dockerfile }}" --tag "ci-${{ strategy.job-index }}" .
+
+  # One stable check name for branch protection, so adding or renaming a job
+  # never means editing the protection rule.
+  ci-ok:
+    name: CI OK
+    if: always()
+    needs: [lint, test, test-postgres, docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All required jobs passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "job results: $RESULTS"
+          for result in $RESULTS; do
+            case "$result" in
+              success|skipped) ;;
+              *) echo "::error::a required job finished as '$result'"; exit 1 ;;
+            esac
+          done

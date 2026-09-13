@@ -1,0 +1,25 @@
+{
+  "name": "mine-core-template",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "github.com/pskclub/mine-core-template",
+  "author": "Passakon Puttasuwan",
+  "license": "MIT",
+  "scripts": {
+    "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:status": "prisma migrate status",
+    "migrate:reset": "prisma migrate reset",
+    "generate": "prisma generate",
+    "studio": "prisma studio",
+    "seed": "bun prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.2.0",
+    "@types/node": "^25.0.3",
+    "dotenv": "^17.2.1"
+  },
+  "devDependencies": {
+    "prisma": "^7.2.0"
+  }
+}
