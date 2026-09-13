@@ -9,7 +9,7 @@
 // Unauthorized, DBError …). Use those directly; this package is only for what
 // this service defines.
 //
-//	import "github.com/pskclub/mine-core-template/emsgs"
+//	import "<module>/emsgs" // <module> is the path in go.mod
 //
 //	return emsgs.InvalidCredentials
 //
