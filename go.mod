@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	github.com/fergusstrange/embedded-postgres v1.34.0
-	github.com/labstack/echo/v5 v5.3.1
+	github.com/labstack/echo/v5 v5.4.0
 	github.com/pskclub/mine-core/v2 v2.2.0
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2
