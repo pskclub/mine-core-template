@@ -61,18 +61,15 @@ func NewExchangeService(ctx core.IContext) IExchangeService {
 // cannot.
 //
 // The cache is optional infrastructure: CACHE_CONNECTION_STRING may be unset, in
-// which case ctx.Cache() is nil and this still works, only slower. A service
-// that panics without redis is a service that cannot be run locally.
+// which case ctx.Cache() is the framework's disabled cache — every read misses
+// and every write is dropped — and this still works, only slower. It is never
+// nil, so there is nothing to check: a service that panics without redis is a
+// service that cannot be run locally, and the framework rules that out for us.
 func (s exchangeService) Rate(base, quote string) (*Rate, core.IError) {
-	cache := s.ctx.Cache()
-	if cache == nil {
-		return s.fetch(base, quote)
-	}
-
 	// core.Remember: return the cached value, or load and store it. A load
 	// failure keeps its own status and code — core.Wrap preserves both — so the
 	// mapping done in fetch survives the cache layer intact.
-	return core.Remember(cache, cacheKey(base, quote), rateTTL, func() (*Rate, error) {
+	return core.Remember(s.ctx.Cache(), cacheKey(base, quote), rateTTL, func() (*Rate, error) {
 		return s.fetch(base, quote)
 	})
 }

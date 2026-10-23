@@ -278,6 +278,21 @@ The framework's own errors (`NotFound`, `BadRequest`, `DBError` …) come from
 mine-core's `errmsgs` — use those directly; `emsgs` is only for what is specific
 to this service.
 
+What the database layer answers on its own, before any `emsgs` error is reached:
+
+| Situation | Status | Code |
+|---|---|---|
+| no row matched | 404 | `NOT_FOUND` |
+| unique index violated | 409 | `DUPLICATE_KEY` |
+| foreign key violated | 409 | `FOREIGN_KEY_VIOLATED` |
+| check constraint violated | 400 | `CHECK_CONSTRAINT_VIOLATED` |
+| anything else from the driver | 500 | `DATABASE_ERROR` |
+
+A unique index is therefore an answer the client can act on, not a server
+fault — but a generic `DUPLICATE_KEY` says nothing about *which* field. Where it
+matters (an email at registration) keep the request-level `Unique` rule, which
+names the field, and let the index be the guarantee underneath it.
+
 Validation codes raised with `v.Must` have no message of their own, so `emsgs`
 registers one per code in `init`. Keeping the code and its wording together
 avoids the message living in whichever request happened to need it first:
@@ -476,6 +491,13 @@ page sends its requests back to whatever host served it, so it works the same
 from `localhost`, from staging, and through a `kubectl port-forward`, with
 nothing to configure.
 
+It is **public in every environment**, production included — no password, no
+`ENV=dev`. mine-core refuses an unguarded mount outside dev, so
+[cmd/api.go](./cmd/api.go) hands it a guard that admits every request: publishing
+the reference is a decision this project made, written down where the routes are
+mounted. To lock it again, replace that guard with `middlewares.AuthRequire(e)` or
+set `Options.BasicAuth`.
+
 > `apispec/openapi.generated.json` is **committed**, unlike the Postman
 > collection: `go:embed` needs it at compile time. `make api-check` fails when it
 > no longer matches the routes, and CI runs it — a route added without
@@ -573,7 +595,7 @@ Two read-only panels, both from mine-core, both off unless asked for:
 
 | | | |
 |---|---|---|
-| `/_docs` | API reference | every endpoint, with a button that sends it |
+| `/_docs` | API reference | every endpoint, with a button that sends it — **public everywhere**, see above |
 | `/_dev` | inspector | capabilities and pool stats, routes and who serves them, config with secrets withheld, jobs and their runs, **modules**, health |
 
 The **modules** tab is the one worth knowing about. It reports what each module
@@ -583,12 +605,12 @@ module's routes and an `api` replica that never armed its cron look perfectly
 healthy from every other angle. A module listed as *registered nothing in this
 process* is the finding.
 
-**When they are on** ([cmd/inspect.go](./cmd/inspect.go)):
+**When `/_dev` is on** ([cmd/inspect.go](./cmd/inspect.go)):
 
 | | |
 |---|---|
 | `ENV=dev` | on, unprotected — a laptop |
-| `DEVTOOLS_PASSWORD` / `APIDOCS_PASSWORD` set | on anywhere, behind a browser login (user defaults to `devtools` / `apidocs`) |
+| `DEVTOOLS_PASSWORD` set | on anywhere, behind a browser login (user defaults to `devtools`) |
 | neither | off, and the routes do not exist |
 
 That gate is in this project, not in the framework: mine-core *refuses to mount*

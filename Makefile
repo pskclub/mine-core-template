@@ -156,7 +156,7 @@ test-e2e:
 #
 # golangci-lint runs through `go run` at the version CI pins, so there is nothing
 # to install and no drift between a laptop and the pipeline.
-GOLANGCI_LINT_VERSION = v2.13.2
+GOLANGCI_LINT_VERSION = v2.15.0
 
 lint:
 	go vet ./... && gofmt -l . && go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run ./...

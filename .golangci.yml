@@ -2,7 +2,7 @@
 #
 # The import layering that this layout depends on — the shared kernel importing
 # nothing, no module importing a sibling — is NOT enforced here. It lives in
-# internal/arch/arch_test.go instead, so it runs under `make test` with no tool
+# arch/arch_test.go instead, so it runs under `make test` with no tool
 # to install, and so a failure can explain in a paragraph why the rule exists
 # rather than pointing at a package name.
 #

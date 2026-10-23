@@ -34,6 +34,9 @@ func serve(app *core.App, e *core.Server, sc *core.Scheduler, mods *core.ModuleS
 	}
 
 	if e != nil {
+		// the inspector is mounted here rather than in NewAPI so the tests,
+		// which build the server through NewAPI, never see it
+		mountInspectors(app, e, sc, mods)
 		opts = append(opts, core.RunHTTP(e))
 	}
 	if sc != nil {

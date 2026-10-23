@@ -63,7 +63,8 @@ if err != nil {
 `ctx.NewError(cause, errorType, args...)` is what preserves the status **and**
 reports 5xx to Sentry with this request's user, tags and breadcrumbs. The
 repository already returns a typed `IError` (a missing row is `NotFound`, a
-driver failure is `DBError`), so `s.ctx.NewError(err, err)` is the idiom: keep
+unique-index violation is 409 `DUPLICATE_KEY`, a foreign-key violation is 409
+`FOREIGN_KEY_VIOLATED`, any other driver failure is `DBError`), so `s.ctx.NewError(err, err)` is the idiom: keep
 what it decided, add the reporting.
 
 To *replace* the outcome, pass the error you want as the second argument:

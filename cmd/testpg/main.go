@@ -84,7 +84,7 @@ func run() int {
 		fmt.Fprintf(os.Stderr, "testpg: runtime dir: %v\n", err)
 		return 1
 	}
-	defer os.RemoveAll(runtimeDir)
+	defer func() { _ = os.RemoveAll(runtimeDir) }()
 
 	logger := io.Discard
 	if verbose {
@@ -276,7 +276,7 @@ func freePort() (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer listener.Close()
+	defer func() { _ = listener.Close() }()
 
 	_, portStr, err := net.SplitHostPort(listener.Addr().String())
 	if err != nil {

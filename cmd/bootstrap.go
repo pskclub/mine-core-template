@@ -61,5 +61,34 @@ func Bootstrap() (*core.App, core.IError) {
 		opts = append(opts, core.WithMQ(mq))
 	}
 
+	// The integrations follow the same rule as the pools above: opened only
+	// when configured, and a handle that fails loudly otherwise. Without these
+	// lines a service that set S3_* or EMAIL_* would still get the disabled
+	// handle, and every upload or mail would fail naming configuration that is
+	// in fact present — the kind of mistake that looks like the framework's.
+	if cfg.S3Bucket != "" {
+		storage, err := core.NewStorage(env)
+		if err != nil {
+			return nil, err
+		}
+		opts = append(opts, core.WithStorage(storage))
+	}
+
+	if cfg.EmailServer != "" {
+		mailer, err := core.NewMailer(env)
+		if err != nil {
+			return nil, err
+		}
+		opts = append(opts, core.WithMailer(mailer))
+	}
+
+	if cfg.FirebaseCredential != "" {
+		pusher, err := core.NewPusherFromEnv(env)
+		if err != nil {
+			return nil, err
+		}
+		opts = append(opts, core.WithPusher(pusher))
+	}
+
 	return core.NewApp(env, opts...)
 }

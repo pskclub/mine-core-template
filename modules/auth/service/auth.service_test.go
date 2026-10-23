@@ -85,9 +85,11 @@ func TestAuthService_Register(t *testing.T) {
 		"and what is stored verifies the password")
 }
 
-// A second account on the same address is a database failure, not a silent
-// overwrite. The unique index is what enforces it — sqlite's autoMigrate schema
-// has no partial index, so the test creates the one the migration deploys.
+// A second account on the same address is refused, not silently overwritten.
+// The unique index is what enforces it — sqlite's autoMigrate schema has no
+// partial index, so the test creates the one the migration deploys — and the
+// repository reports the violation as 409 DUPLICATE_KEY: a conflict the caller
+// can act on, not a server fault.
 func TestAuthService_Register_duplicateEmail(t *testing.T) {
 	ctx := testkit.Context(t)
 	require.NoError(t, ctx.DB().Exec(
@@ -102,7 +104,8 @@ func TestAuthService_Register_duplicateEmail(t *testing.T) {
 	})
 
 	require.NotNil(t, err)
-	assert.GreaterOrEqual(t, err.GetStatus(), http.StatusInternalServerError)
+	assert.Equal(t, http.StatusConflict, err.GetStatus())
+	assert.Equal(t, "DUPLICATE_KEY", err.GetCode())
 }
 
 func TestAuthService_Login(t *testing.T) {

@@ -196,7 +196,8 @@ func TestUserService_CreateMany_rollsBackOnFailure(t *testing.T) {
 	_, err := svc.CreateMany(payloads)
 
 	require.NotNil(t, err)
-	assert.GreaterOrEqual(t, err.GetStatus(), http.StatusInternalServerError)
+	assert.Equal(t, http.StatusConflict, err.GetStatus(), "a unique-index clash is the caller's conflict, not a server fault")
+	assert.Equal(t, "DUPLICATE_KEY", err.GetCode())
 
 	// the first batch went in before the clash; the rollback must have undone it
 	var count int64

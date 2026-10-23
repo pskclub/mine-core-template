@@ -23,6 +23,13 @@ route is guarded is to scroll up. The safety net is each module's
 `Test<Name>API_requiresAuthentication`, which names every route and asserts an
 anonymous caller gets 401. **Every new route goes into that test.**
 
+The two routes that must stay public — `/auth/register` and `/auth/login` —
+carry `core.RateLimit` instead
+([auth.http.go](../../../modules/auth/auth.http.go)): 10 attempts per client
+address per minute, counted in the cache so every replica shares the count, and
+fail-open when there is no cache. Any new route an anonymous caller can use to
+guess (a reset code, an invite token) gets the same middleware.
+
 `AuthRole` answers only "who is calling, in what role". Whether that caller may
 touch *this row* is a business rule and belongs in the service, where it can see
 the row.

@@ -116,14 +116,12 @@ Full worked example with the reasoning inline:
 The base URL is a module key, read ad hoc — `ctx.ENV().String("exchange_base_url")` —
 and **missing config fails loudly** rather than calling a default nobody chose.
 
-Cache what is expensive and slow-moving, and keep working without redis:
+Cache what is expensive and slow-moving. `ctx.Cache()` is never nil: with no
+`CACHE_*` configured it is the framework's disabled cache — every read misses,
+every write is dropped — so the same line keeps working without redis:
 
 ```go
-cache := s.ctx.Cache()
-if cache == nil {
-    return s.fetch(base, quote)
-}
-return core.Remember(cache, cacheKey(base, quote), rateTTL, func() (*Rate, error) {
+return core.Remember(s.ctx.Cache(), cacheKey(base, quote), rateTTL, func() (*Rate, error) {
     return s.fetch(base, quote)
 })
 ```

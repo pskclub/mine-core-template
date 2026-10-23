@@ -46,7 +46,7 @@ Every recipe in the [Makefile](Makefile) runs on Windows, macOS and Linux: on Wi
 - [cmd/api.go](cmd/api.go) `NewAPI` — the probes (handed `mods.HealthChecks()`) and this deployment's HTTP options. It knows no module.
 - [cmd/worker.go](cmd/worker.go) `newScheduler` — only the jobs that belong to the *process* rather than to a feature. A module arms its own through `Module.Cron`.
 
-[cmd/inspect.go](cmd/inspect.go) `mountInspectors` — `/_docs` (API reference, from the OpenAPI document embedded in [apispec/](apispec/)) and `/_dev` (inspector: capabilities, routes, config, jobs, **modules**, health). On when `ENV=dev`, or anywhere `DEVTOOLS_PASSWORD`/`APIDOCS_PASSWORD` is set; off otherwise, routes and all. Called from `serve`, not `NewAPI` — they are a deployment concern, so tests get neither.
+[cmd/inspect.go](cmd/inspect.go) `mountInspectors` — `/_dev` (inspector: capabilities, routes, config, jobs, **modules**, health). On when `ENV=dev` (writes allowed), or anywhere `DEVTOOLS_PASSWORD` is set (read-only, behind a browser login); off otherwise, routes and all. Called from `serve`, not `NewAPI` — it is a deployment concern, so tests never get it. `/_docs` (API reference, from the OpenAPI document embedded in [apispec/](apispec/)) is the other panel and lives in `NewAPI` instead, because it is public in every environment by decision.
 
 [cmd/bootstrap.go](cmd/bootstrap.go) builds the `App` once: config plus one connection pool per configured backend, for the process lifetime. A backend with no config is simply not opened.
 
@@ -94,7 +94,7 @@ Nothing in Go migrates the database. A table change is: edit `prisma/schema/*.pr
 
 ## Errors
 
-This service's errors live in [emsgs/](emsgs/), one file per module, declared once as sentinels (compare with `errors.Is`). Framework errors (`NotFound`, `BadRequest`, `Unauthorized`, `DBError`) come from mine-core's `errmsgs` — use those directly. Statuses come from `net/http`, never a literal. A validation code raised with `v.Must` needs a message registered in that file's `init`.
+This service's errors live in [emsgs/](emsgs/), one file per module, declared once as sentinels (compare with `errors.Is`). Framework errors (`NotFound`, `BadRequest`, `Unauthorized`, `DBError`) come from mine-core's `errmsgs` — use those directly. The repository already maps a unique-index violation to 409 `DUPLICATE_KEY` and a foreign-key violation to 409 `FOREIGN_KEY_VIOLATED`; a request-level `Unique` rule is still what names the offending field. Statuses come from `net/http`, never a literal. A validation code raised with `v.Must` needs a message registered in that file's `init`.
 
 ## Logging
 
@@ -140,5 +140,7 @@ Always `core.Requester(ctx)` — never `http.Get`, never a client built for the 
 - **Use `repo.DefaultOrder(opts, ...)`, not `.Order()`** — `Pagination` already applies `opts.OrderBy`, so adding `Order()` emits the clause twice.
 
 ## Authentication
+
+`/auth/register` and `/auth/login` carry `core.RateLimit` (10 attempts per client address per minute, counted in the cache, fail-open without one). `cmd.NewAPI` adds `core.SecureHeaders()` to the whole server and skips the access line for healthy probes via `HTTPOptions.SkipRequestLogPaths`.
 
 Opaque bearer tokens, verified against the database; only the SHA-256 digest is stored. Plain SHA-256 (not bcrypt) is deliberate for tokens — 256 bits of `crypto/rand`, looked up on every request. Passwords use bcrypt. Revocation is a `DELETE`; TTL is `TokenTTL` in [modules/auth/service/auth.service.go](modules/auth/service/auth.service.go) (24h, not re-exported). Sign-in answers identically for a wrong password and an unknown address. `c.GetUser()` inside a protected handler returns the caller; `middlewares.AuthOptional` and `middlewares.AuthRole` exist for the other two cases.
